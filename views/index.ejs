@@ -1,0 +1,94 @@
+<!DOCTYPE>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <script type="text/javascript" src="/js/lib/jquery-2.2.1.min.js"></script>
+  <script type="text/javascript" src="/js/lib/bootstrap.min.js"></script>
+
+  <link rel="stylesheet" href="/css/index.css">
+  <link rel="stylesheet" 	href="/css/lib/bootstrap.min.css">
+</head>
+<script type="text/javascript">
+$(document).ready(function() {
+	$('#configure').css({
+		'margin-left' : $('#configure').width() / (-2),
+		'margin-top' : $('#configure').height() / (-2),
+	});
+	$('.configure-tab li').click(function(e){
+		$('.configure').hide();
+		$('.configure-tab li').removeClass('active');
+
+		$('.configure[value='+ $(this).val() +']').show();
+		$(this).addClass('active');
+
+    $(this).parent().parent().val($(this).val());
+	});
+
+  $('#configureSubmit').click(function(){
+    if($('#configure').val() == 0){
+        $('#configureForm').attr('action', '/canvas')
+                           .attr('method', 'post')
+                           .submit();
+    } else {
+        $('#configureFormParty').attr('action', '/canvas')
+                                .attr('method', 'post')
+                                .submit();
+    }
+
+  });
+});
+</script>
+<body>
+	<div class="container">
+		<div class="panel panel-default" id="configure" value="0">
+			<ul class="nav nav-tabs configure-tab">
+				<li role="presentation" class="active" value="0"><a><span class="glyphicon glyphicon-user"></span>혼자하기</a></li>
+				<li role="presentation" value="1"><a><span class="glyphicon glyphicon-globe"></span>같이하기</a></li>
+			</ul>
+			<div class="configure" value="0">
+				<div class="panel-body">
+					<form class="form-horizontal" id="configureForm">
+						<div class="form-group">
+							<label for="" class="col-sm-4 control-label">캔버스 크기</label>
+		    				<div class="col-sm-8">
+								<input type="text" class="form-control configure-size" name="width">
+								<span>x</span>
+								<input type="text" class="form-control configure-size" name="height">
+							</div>
+						</div>
+            <input type="hidden" value="1" name="person" />
+					</form>
+				</div>
+			</div>
+			<div class="configure" value="1" style="display:none;">
+				<div class="panel-body">
+					<form id="configureFormParty" class="form-horizontal">
+						<div class="form-group">
+							<label for="" class="col-sm-4 control-label">캔버스 크기</label>
+							<div class="col-sm-8">
+								<input type="text" class="form-control configure-size" name="width">
+								<span>x</span>
+								<input type="text" class="form-control configure-size" name="height">
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="" class="col-sm-4 control-label">최대 인원수</label>
+							<div class="col-sm-8">
+								<select class="form-control configure-person" name="person">
+									<option>2</option>
+									<option>3</option>
+									<option>4</option>
+								</select>
+							</div>
+						</div>
+					</form>
+				</div>
+			</div>
+			<div class="panel-footer text-right">
+				<button class="btn btn-primary" type="submit" id="configureSubmit">시작</button>
+			</div>
+		</div>
+	</div>
+
+</body>
+</html>

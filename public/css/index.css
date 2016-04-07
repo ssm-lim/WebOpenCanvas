@@ -1,0 +1,29 @@
+.configure {
+	width: 500px;
+	top : 40%;
+	left : 50%;
+	position : absolute;
+	border : 0px !important;
+}
+.configure .panel-body{
+	border-right: 1px solid #ddd;
+	border-left: 1px solid #ddd;
+}
+.configure .panel-footer{
+	border-right: 1px solid #ddd;
+	border-left: 1px solid #ddd;
+	border-bottom: 1px solid #ddd;
+}
+.configure-tab li a{
+	background-color: #ddd;
+	cursor: pointer;
+}
+
+.configure-size {
+	width: 100px !important;
+	display: inline !important;
+}
+
+.configure-person {
+	width: 216px !important;
+}

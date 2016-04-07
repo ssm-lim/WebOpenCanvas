@@ -1,0 +1,106 @@
+<!DOCTYPE>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <script type="text/javascript" src="/js/lib/jquery-2.2.1.min.js"></script>
+  <script type="text/javascript" src="/js/lib/bootstrap.min.js"></script>
+  <script type="text/javascript" src="/js/lib/colorpicker.js"></script>
+  <script type="text/javascript" src="/js/lib/bootstrap-slider.js"></script>
+
+    <script type="text/javascript" src="/js/lib/socket.io.js"></script>
+
+<script type="text/javascript" src="/js/draggable.js"></script>
+  <script type="text/javascript" src="/js/canvas.js"></script>
+
+  <!-- <script type="text/javascript" src="/js/resizable.js"></script> -->
+
+
+  <link rel="stylesheet" href="/css/canvas.css">
+  <link rel="stylesheet" href="/css/lib/colorpicker.css">
+  <link rel="stylesheet" 	href="/css/lib/bootstrap.min.css">
+</head>
+<body>
+  <!-- <div class="part-modal">
+		<div class="modal fade in" style="display: block">
+			<div class="modal-dialog modal-sm" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h4 class="modal-title" id="myModalLabel">시작</h4>
+					</div>
+					<div class="modal-body">
+						<form class="form-horizontal">
+							<div class="form-group">
+								<label for="" class="col-sm-4 control-label">대화명</label>
+								<div class="col-sm-8">
+									<input type="text" class="form-control">
+								</div>
+							</div>
+						</form>
+
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-default" data-dismiss="modal">취소</button>
+						<button type="button" class="btn btn-primary">확인</button>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="modal-backdrop fade in"></div>
+	</div> -->
+
+	<div class="part-canvas">
+		<div class="container">
+			<div class="canvasDiv" id="canvasDiv"></div>
+		</div>
+	</div>
+  <canvas width="500" height="500" id="canvas"></canvas>
+  <script type="text/javascript">
+
+    $(document).ready(function(){
+      var socket = io.connect('http://localhost:3000');
+
+			if(socket != null && socket != undefined){
+
+        $('#canvasDiv').canvas({
+          mousedown : function(tool, coordinate){
+            socket.emit('mousedown', {
+              tool : tool,
+              coordinate : coordinate
+            });
+          },
+          mousemove : function(tool, coordinate){
+            socket.emit('mousemove', {
+              tool : tool,
+              coordinate : coordinate
+            });
+          },
+          mouseup : function(tool, coordinate){
+            socket.emit('mouseup', {
+              tool : tool,
+              coordinate : coordinate
+            });
+          }
+        });
+
+        var context = $('#canvas')[0].getContext('2d');
+				socket.on('mousedown', function(data){
+          context.beginPath();
+          context.moveTo(data.coordinate.startX, data.coordinate.startY);
+				});
+        socket.on('mousemove', function(data){
+          context.lineTo(data.coordinate.mouseX, data.coordinate.mouseY);
+          context.stroke();
+				});
+        socket.on('mouseup', function(data){
+          context.closePath();
+				});
+
+
+
+    	};
+    });
+
+  </script>
+
+</body>
+</html>

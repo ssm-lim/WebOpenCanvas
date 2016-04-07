@@ -1,0 +1,137 @@
+ul {
+	width: 100%;
+	margin: 0;
+	padding: 0;
+}
+
+ul li {
+	list-style: none;
+}
+.draggable {
+	float:right;
+}
+.hidable{
+	float:right;
+	margin-right:2px;
+}
+.btn-circle {
+  width: 24px;
+  height: 24px;
+  text-align: center;
+  padding: 0px 0 !important ;
+  font-size: 12px;
+  line-height: 1.428571429;
+  border-radius: 12px !important;
+}
+.btn-circle i{
+  top: 0 !important;
+}
+#canvasDiv {
+	text-align: center;
+}
+#canvas {
+	border : 1px solid #000;
+}
+#menu {
+	width: 116px;
+	position: absolute;
+	top: 10px;
+	z-index: 1;
+}
+.tools {
+	margin-bottom: 10px;
+}
+
+.tool {
+	border: 1px solid #000;
+	width: 40px !important;
+	height: 40px;
+	cursor:pointer;
+}
+
+.unredo {
+	margin-bottom: 10px;
+}
+
+.color {
+	margin-bottom: 10px;
+}
+.colorpicker {
+	z-index:5;
+}
+.rgb-view {
+	width: 41px;
+	height: 48px;
+	display: inline-block;
+	border: 1px solid #000;
+	background-color: #000
+}
+.rgb-code>div {
+	font-size: 12px;
+}
+.slider {
+	width: 100% !important;
+}
+#layers {
+	width: 200px;
+	position: absolute;
+	top: 250px;
+	left: 150px;
+	z-index: 2;
+}
+
+.layer-list {
+	height: 200px;
+	padding: 0;
+	overflow-y: scroll;
+}
+
+.layer-list-view {
+	float: left;
+	border: 1px solid #000;
+	width: 45px;
+	height: 45px;
+}
+
+.layer-list-view img {
+	width: 100%;
+	height: 100%;
+}
+
+.layer-list-name {
+	display: inline-block;
+	height: 45px;
+	line-height: 45px;
+	margin-left: 11px;
+}
+
+#chat {
+	width: 500px;
+	position: absolute;
+	top: 200px;
+	left: 200px;
+	z-index: 0;
+}
+
+.chat-msg {
+	height: 200px;
+	padding: 0;
+	overflow-y: scroll;
+}
+
+.chat-msg .name {
+	float: left;
+	width: 45px;
+	height: 15px;
+}
+
+.chat-msg-txt {
+	display: inline-block;
+	height: 15px;
+	line-height: 15px;
+	margin-left: 11px;
+}
+
+.resizable {
+	position: relative;
+}
