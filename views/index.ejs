@@ -15,26 +15,25 @@ $(document).ready(function() {
 		'margin-top' : $('#configure').height() / (-2),
 	});
 	$('.configure-tab li').click(function(e){
-		$('.configure').hide();
+		$('.tab').hide();
 		$('.configure-tab li').removeClass('active');
 
-		$('.configure[value='+ $(this).val() +']').show();
 		$(this).addClass('active');
-
     $(this).parent().parent().val($(this).val());
+
+    $('#configureForm input[name=type]').val($(this).val());
+
+    if($(this).val() == 1){
+      $('.room').show();
+    } else {
+      $('.room').hide();
+    }
 	});
 
   $('#configureSubmit').click(function(){
-    if($('#configure').val() == 0){
-        $('#configureForm').attr('action', '/canvas')
-                           .attr('method', 'post')
-                           .submit();
-    } else {
-        $('#configureFormParty').attr('action', '/canvas')
-                                .attr('method', 'post')
-                                .submit();
-    }
-
+    $('#configureForm').attr('action', '/canvas')
+                       .attr('method', 'post')
+                       .submit();
   });
 });
 </script>
@@ -45,44 +44,28 @@ $(document).ready(function() {
 				<li role="presentation" class="active" value="0"><a><span class="glyphicon glyphicon-user"></span>혼자하기</a></li>
 				<li role="presentation" value="1"><a><span class="glyphicon glyphicon-globe"></span>같이하기</a></li>
 			</ul>
-			<div class="configure" value="0">
-				<div class="panel-body">
-					<form class="form-horizontal" id="configureForm">
-						<div class="form-group">
-							<label for="" class="col-sm-4 control-label">캔버스 크기</label>
-		    				<div class="col-sm-8">
-								<input type="text" class="form-control configure-size" name="width">
-								<span>x</span>
-								<input type="text" class="form-control configure-size" name="height">
-							</div>
+			<div class="panel-body">
+				<form id="configureForm" class="form-horizontal">
+          <input type="hidden" value="0" name="type" value="0"/>
+					<div class="form-group">
+						<label for="" class="col-sm-4 control-label">캔버스 크기</label>
+						<div class="col-sm-8">
+							<input type="text" class="form-control configure-size" name="width">
+							<span>x</span>
+							<input type="text" class="form-control configure-size" name="height">
 						</div>
-            <input type="hidden" value="1" name="person" />
-					</form>
-				</div>
-			</div>
-			<div class="configure" value="1" style="display:none;">
-				<div class="panel-body">
-					<form id="configureFormParty" class="form-horizontal">
-						<div class="form-group">
-							<label for="" class="col-sm-4 control-label">캔버스 크기</label>
-							<div class="col-sm-8">
-								<input type="text" class="form-control configure-size" name="width">
-								<span>x</span>
-								<input type="text" class="form-control configure-size" name="height">
-							</div>
+					</div>
+					<div class="form-group room" style="display:none">
+						<label for="" class="col-sm-4 control-label">최대 인원수</label>
+						<div class="col-sm-8">
+							<select class="form-control configure-person" name="person">
+								<option>2</option>
+								<option>3</option>
+								<option>4</option>
+							</select>
 						</div>
-						<div class="form-group">
-							<label for="" class="col-sm-4 control-label">최대 인원수</label>
-							<div class="col-sm-8">
-								<select class="form-control configure-person" name="person">
-									<option>2</option>
-									<option>3</option>
-									<option>4</option>
-								</select>
-							</div>
-						</div>
-					</form>
-				</div>
+					</div>
+				</form>
 			</div>
 			<div class="panel-footer text-right">
 				<button class="btn btn-primary" type="submit" id="configureSubmit">시작</button>

@@ -5,6 +5,7 @@
 		var minimalDiv = selected || $this;
 		var isClosed = $this.attr('isClosed') || 'false';
 		minimalDiv.on('dblclick', function(e) {
+			isClosed = $this.attr('isClosed');
 			if (isClosed == 'true') {
 				$this.attr('isClosed', 'false');
 				minimalDiv.children().css("display", "");

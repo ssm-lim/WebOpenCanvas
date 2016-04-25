@@ -1,15 +1,15 @@
-.configure {
+#configure {
 	width: 500px;
 	top : 40%;
 	left : 50%;
 	position : absolute;
 	border : 0px !important;
 }
-.configure .panel-body{
+#configure .panel-body{
 	border-right: 1px solid #ddd;
 	border-left: 1px solid #ddd;
 }
-.configure .panel-footer{
+#configure .panel-footer{
 	border-right: 1px solid #ddd;
 	border-left: 1px solid #ddd;
 	border-bottom: 1px solid #ddd;

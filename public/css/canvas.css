@@ -26,11 +26,15 @@ ul li {
 .btn-circle i{
   top: 0 !important;
 }
-#canvasDiv {
-	text-align: center;
-}
-#canvas {
+.canvas-container {
+	position:relative;
 	border : 1px solid #000;
+	margin : 0 auto;
+}
+.canvas-container canvas {
+	position: absolute;
+	left: 0;
+	top: 0;
 }
 #menu {
 	width: 116px;

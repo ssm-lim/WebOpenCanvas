@@ -6,98 +6,186 @@
   <script type="text/javascript" src="/js/lib/bootstrap.min.js"></script>
   <script type="text/javascript" src="/js/lib/colorpicker.js"></script>
   <script type="text/javascript" src="/js/lib/bootstrap-slider.js"></script>
-
-    <script type="text/javascript" src="/js/lib/socket.io.js"></script>
-
-<script type="text/javascript" src="/js/draggable.js"></script>
-  <script type="text/javascript" src="/js/canvas.js"></script>
-
+  <script type="text/javascript" src="/js/draggable.js"></script>
   <!-- <script type="text/javascript" src="/js/resizable.js"></script> -->
+  <script type="text/javascript" src="/js/canvas.js"></script>
+  <script type="text/javascript" src="/js/chat.js"></script>
+  <script type="text/javascript" src="/js/mirroring-canvas.js"></script>
 
+  <% if(isRoom == true) {%>
+    <script type="text/javascript" src="/js/lib/socket.io.js"></script>
+  <% }%>
 
   <link rel="stylesheet" href="/css/canvas.css">
-  <link rel="stylesheet" href="/css/lib/colorpicker.css">
   <link rel="stylesheet" 	href="/css/lib/bootstrap.min.css">
+  <link rel="stylesheet" href="/css/lib/colorpicker.css">
+  <link rel="stylesheet" 	href="/css/lib/slider.css">
+
 </head>
 <body>
-  <!-- <div class="part-modal">
+  <% if(isRoom == true) {%>
+  <div class="part-modal">
 		<div class="modal fade in" style="display: block">
-			<div class="modal-dialog modal-sm" role="document">
+			<div class="modal-dialog" role="document">
 				<div class="modal-content">
 					<div class="modal-header">
-						<h4 class="modal-title" id="myModalLabel">시작</h4>
+						<h4 class="modal-title" id="">시작</h4>
 					</div>
 					<div class="modal-body">
 						<form class="form-horizontal">
 							<div class="form-group">
-								<label for="" class="col-sm-4 control-label">대화명</label>
-								<div class="col-sm-8">
-									<input type="text" class="form-control">
+								<label for="" class="col-sm-2 control-label">대화명</label>
+								<div class="col-sm-10">
+									<input type="text" class="form-control" id="modalChatName">
+                  <span id="modalChatErr" class="help-block"></span>
 								</div>
 							</div>
 						</form>
-
 					</div>
 					<div class="modal-footer">
-						<button type="button" class="btn btn-default" data-dismiss="modal">취소</button>
-						<button type="button" class="btn btn-primary">확인</button>
+						<button type="button" class="btn btn-default" data-dismiss="modal" id="modalChatCancel">취소</button>
+						<button type="button" class="btn btn-primary" id="modalChatStart">확인</button>
 					</div>
 				</div>
 			</div>
 		</div>
 		<div class="modal-backdrop fade in"></div>
-	</div> -->
+	</div>
+  <% } %>
 
 	<div class="part-canvas">
 		<div class="container">
 			<div class="canvasDiv" id="canvasDiv"></div>
 		</div>
 	</div>
-  <canvas width="500" height="500" id="canvas"></canvas>
+  <div id="chat" class="panel panel-default" style="display:none"></div>
+
   <script type="text/javascript">
-
     $(document).ready(function(){
-      var socket = io.connect('http://localhost:3000');
+      var myCanvas;
 
-			if(socket != null && socket != undefined){
+      <% if(isRoom == true) {%>
+        var socket = io.connect('http://localhost:3000/<%=roomNo %>');
 
-        $('#canvasDiv').canvas({
-          mousedown : function(tool, coordinate){
-            socket.emit('mousedown', {
-              tool : tool,
-              coordinate : coordinate
+  			if(socket != null && socket != undefined){
+
+          socket.on('disconnection', function(data){
+            var msg = '접속을 종료합니다.';
+            if(data.code == 'max'){
+              msg += '\n최대 인원수를 초과하였습니다.';
+            }
+            alert(msg);
+            location.href = '/';
+          });
+
+
+          $('#modalChatStart').click(function(){
+            socket.emit('join', {
+              user : $('#modalChatName').val()
             });
-          },
-          mousemove : function(tool, coordinate){
-            socket.emit('mousemove', {
-              tool : tool,
-              coordinate : coordinate
+          });
+
+          $('#modalChatCancel').click(function(){
+            socket.emit('close');
+            location.href = "/";
+          });
+
+          socket.on('join-reject', function(data){
+            var errMsg = '알 수 없는 에러가 발생하였습니다. 처음부터 다시 진행해주세요.';
+            if(data.code == 'noroom'){
+              errMsg = '방이 존재하지 않습니다. 처음부터 다시 진행해주세요.';
+            } else if(data.code == 'duplicated'){
+              errMsg = '이미 사용중인 대화명입니다.';
+            }
+            $('#modalChatErr').val(errMsg);
+          });
+
+          socket.on('join-ok', function(data){
+            $('.part-modal').remove();
+
+            $('#canvasDiv').canvas({
+              width : <%=width %>,
+              height : <%=height %>
             });
-          },
-          mouseup : function(tool, coordinate){
-            socket.emit('mouseup', {
-              tool : tool,
-              coordinate : coordinate
-            });
-          }
+
+            $('#chat').show().chat(socket);
+
+          });
+
+          socket.on('changePerson', function(data){
+            // canvas 삭제
+          });
+
+
+        //   $('#canvasDiv').canvas({
+            // mousedown : function(tool, coordinate){
+            //   socket.emit('mousedown', {
+            //     tool : tool,
+            //     coordinate : coordinate
+            //   });
+            // },
+            // mousemove : function(tool, coordinate){
+            //   socket.emit('mousemove', {
+            //     tool : tool,
+            //     coordinate : coordinate
+            //   });
+            // },
+            // mouseup : function(tool, coordinate){
+            //   socket.emit('mouseup', {
+            //     tool : tool,
+            //     coordinate : coordinate
+            //   });
+            // }
+          // });
+
+          // var context = $('#canvas')[0].getContext('2d');
+
+  				// socket.on('mousedown', function(data){
+          //   context.beginPath();
+          //   context.moveTo(data.coordinate.startX, data.coordinate.startY);
+  				// });
+          // socket.on('mousemove', function(data){
+          //   context.lineTo(data.coordinate.mouseX, data.coordinate.mouseY);
+          //   context.stroke();
+  				// });
+          // socket.on('mouseup', function(data){
+          //   context.closePath();
+  				// });
+
+
+
+      	};
+      //
+      //   $('#start').click(function(){
+      //
+      //   });
+      //
+      //   $('#cancel').click(function(){
+      //
+      //   });
+
+      // var layers = $('#layers');
+      // var heading = layers.find('.panel-heading');
+      //     layers.draggable(heading);
+      //     layers.minimalize(heading);
+      //
+      // var layerList = layer.find('.layer-list');
+      // layerList.on('click', 'a', function(e){
+      //   layerList.find('a').removeClass('active');
+      //
+      //   $(this).addClass('active');
+      // });
+
+
+
+      <% } else {%>
+        myCanvas = $('#canvasDiv').canvas({
+          width : <%=width %>,
+          height : <%=height %>
         });
-
-        var context = $('#canvas')[0].getContext('2d');
-				socket.on('mousedown', function(data){
-          context.beginPath();
-          context.moveTo(data.coordinate.startX, data.coordinate.startY);
-				});
-        socket.on('mousemove', function(data){
-          context.lineTo(data.coordinate.mouseX, data.coordinate.mouseY);
-          context.stroke();
-				});
-        socket.on('mouseup', function(data){
-          context.closePath();
-				});
+      <% } %>
 
 
-
-    	};
     });
 
   </script>

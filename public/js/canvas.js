@@ -4,15 +4,14 @@
 	var drawingTools = {
 		pencil : function(drawing) {
 			var context = drawing.context,
-				canvas = drawing.canvas;
-
+					canvas = drawing.container;
 			drawing.setColor();
 			drawing.setLineWidth();
 			drawing.started = false;
 
 			this.mousedown = function(e) {
-				drawing.startX = e.pageX - canvas.offsetLeft;
-				drawing.startY = e.pageY - canvas.offsetTop;
+				drawing.startX = e.offsetX;
+				drawing.startY = e.offsetY;
 				context.beginPath();
 				context.moveTo(drawing.startX, drawing.startY);
 				drawing.started = true;
@@ -21,8 +20,8 @@
 			this.mousemove = function(e) {
 
 				if (drawing.started) {
-					drawing.mouseX = e.pageX - canvas.offsetLeft;
-					drawing.mouseY = e.pageY - canvas.offsetTop;
+					drawing.mouseX = e.offsetX;
+					drawing.mouseY = e.offsetY;
 					context.lineTo(drawing.mouseX, drawing.mouseY);
 					context.stroke();
 				}
@@ -40,15 +39,15 @@
 		},
 		eraser : function(drawing) {
 			var context = drawing.context,
-				canvas = drawing.canvas;
+				canvas = drawing.container;
 
 			drawing.started = false;
 			drawing.setLineWidth();
 			context.strokeStyle = "#fff";
 
 			this.mousedown = function(e) {
-				drawing.startX = e.pageX - canvas.offsetLeft;
-				drawing.startY = e.pageY - canvas.offsetTop;
+				drawing.startX = e.offsetX;
+				drawing.startY = e.offsetY;
 				context.beginPath();
 				context.moveTo(drawing.startX, drawing.startY);
 				drawing.started = true;
@@ -57,8 +56,8 @@
 			this.mousemove = function(e) {
 
 				if (drawing.started) {
-					drawing.mouseX = e.pageX - canvas.offsetLeft;
-					drawing.mouseY = e.pageY - canvas.offsetTop;
+					drawing.mouseX = e.offsetX;
+					drawing.mouseY = e.offsetY;
 					context.lineTo(drawing.mouseX, drawing.mouseY);
 					context.stroke();
 				}
@@ -76,7 +75,7 @@
 		},
 		rectangle : function(drawing) {
 			var context = drawing.context,
-				canvas = drawing.canvas;
+				canvas = drawing.container;
 
 			drawing.setColor();
 			drawing.setLineWidth();
@@ -84,8 +83,8 @@
 			drawing.started = false;
 
 			this.mousedown = function(e) {
-				drawing.startX = e.pageX - canvas.offsetLeft;
-				drawing.startY = e.pageY - canvas.offsetTop;
+				drawing.startX = e.offsetX;
+				drawing.startY = e.offsetY;
 				context.beginPath();
 				drawing.started = true;
 			};
@@ -93,8 +92,8 @@
 			this.mousemove = function(e) {
 
 				if (drawing.started) {
-					drawing.mouseX = e.pageX - canvas.offsetLeft;
-					drawing.mouseY = e.pageY - canvas.offsetTop;
+					drawing.mouseX = e.offsetX;
+					drawing.mouseY = e.offsetY;
 
 					var x = Math.min(drawing.mouseX, drawing.startX), y = Math.min(drawing.mouseY, drawing.startY),
 						w = Math.abs(drawing.mouseX - drawing.startX), h = Math.abs(drawing.mouseY - drawing.startY);
@@ -115,7 +114,7 @@
 		},
 		circle : function(drawing) {
 			var context = drawing.context,
-				canvas = drawing.canvas;
+				canvas = drawing.container;
 
 			drawing.setColor();
 			drawing.setLineWidth();
@@ -123,16 +122,16 @@
 			drawing.started = false;
 
 			this.mousedown = function(e) {
-				drawing.startX = e.pageX - canvas.offsetLeft;
-				drawing.startY = e.pageY - canvas.offsetTop;
+				drawing.startX = e.offsetX;
+				drawing.startY = e.offsetY;
 				drawing.started = true;
 			};
 
 			this.mousemove = function(e) {
 
 				if (drawing.started) {
-					drawing.mouseX = e.pageX - canvas.offsetLeft;
-					drawing.mouseY = e.pageY - canvas.offsetTop;
+					drawing.mouseX = e.offsetX;
+					drawing.mouseY = e.offsetY;
 
 					drawing.redraw();
 
@@ -166,16 +165,16 @@
 			drawing.started = false;
 
 			this.mousedown = function(e) {
-				drawing.startX = e.pageX - canvas.offsetLeft;
-				drawing.startY = e.pageY - canvas.offsetTop;
+				drawing.startX = e.offsetX;
+				drawing.startY = e.offsetY;
 				drawing.started = true;
 			};
 
 			this.mousemove = function(e) {
 
 				if (drawing.started) {
-					drawing.mouseX = e.pageX - canvas.offsetLeft;
-					drawing.mouseY = e.pageY - canvas.offsetTop;
+					drawing.mouseX = e.offsetX;
+					drawing.mouseY = e.offsetY;
 
 					drawing.redraw();
 
@@ -200,13 +199,19 @@
 
 
 	var CanvasDrawing = function(element, options) {
-
 		var me = this;
 		me.element = element;
-		console.log(options);
 		me.options = options;
 
-		me.canvas = $('<canvas width='+ me.options.width +' height=' + me.options.height + '>').appendTo(me.element)[0];
+		me.container = $('<div>', {
+								class : 'canvas-container',
+								css : {
+									'width' : me.options.width + 'px',
+									'height' : me.options.height + 'px'
+								}
+						 }).appendTo(me.element);
+
+		me.canvas = $('<canvas width='+ me.options.width +' height=' + me.options.height + '>').appendTo(me.container)[0];
 		me.context = me.canvas.getContext("2d");
 
 		me.record = [];
@@ -219,7 +224,7 @@
 		me.context.lineCap = me.options.lineCap;
 		me.context.lineJoin = me.options.lineJoin;
 
-		var menu = $('<div id="menu" class="panel panel-default">').appendTo(me.element.parent());
+		var menu = $('<div id="menu" class="panel panel-default">').appendTo(me.element);
 		var heading = $('<div class="panel-heading">' +
 						'<span class="glyphicon glyphicon-pencil"></span> Menu' +
 						'</div>').appendTo(menu);
@@ -305,22 +310,22 @@
 						});
 
 
-		$(me.canvas).on('mousedown', function(ev){
+		$(me.container).on('mousedown', function(ev){
 			if(me.options.mousedown){
 				me.options.mousedown(me.options.tool,me.getCanvasInfo());
 			}
 		});
-		$(me.canvas).on('mouseup', function(ev){
+		$(me.container).on('mouseup', function(ev){
 			if(me.started && me.options.mousedown){
 				me.options.mouseup(me.options.tool,me.getCanvasInfo());
 			}
 		});
-		$(me.canvas).on('mouseout', function(ev){
+		$(me.container).on('mouseout', function(ev){
 			if(me.started && me.options.mousedown){
 				me.options.mouseout(me.options.tool,me.getCanvasInfo());
 			}
 		});
-		$(me.canvas).on('mousemove', function(ev){
+		$(me.container).on('mousemove', function(ev){
 			if(me.started && me.options.mousedown){
 				me.options.mousemove(me.options.tool, me.getCanvasInfo());
 			}
@@ -333,18 +338,18 @@
 			setTool : function(tool) {
 				var drawing = this;
 				if(this.tool){
-					$(this.canvas).off('mousedown', this.tool.mousedown);
-					$(this.canvas).off('mouseup', this.tool.mouseup);
-					$(this.canvas).off('mousemove', this.tool.mousemove);
-					$(this.canvas).off('mouseout', this.tool.mouseout);
+					$(this.container).off('mousedown', this.tool.mousedown);
+					$(this.container).off('mouseup', this.tool.mouseup);
+					$(this.container).off('mousemove', this.tool.mousemove);
+					$(this.container).off('mouseout', this.tool.mouseout);
 				}
 
 				this.options.tool = tool;
 				this.tool = new this.tools[tool](drawing);
-				$(this.canvas).on('mousedown', this.tool.mousedown);
-				$(this.canvas).on('mouseup', this.tool.mouseup);
-				$(this.canvas).on('mousemove', this.tool.mousemove);
-				$(this.canvas).on('mouseout', this.tool.mouseout);
+				$(this.container).on('mousedown', this.tool.mousedown);
+				$(this.container).on('mouseup', this.tool.mouseup);
+				$(this.container).on('mousemove', this.tool.mousemove);
+				$(this.container).on('mouseout', this.tool.mouseout);
 			},
 			setColor : function(color) {
 				this.color = color || this.color;
