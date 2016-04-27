@@ -157,16 +157,26 @@ module.exports = function(io){
                 }
               });
 
-            // socket.on('mousedown', function(data){
-            //   console.log('mousedown');
-            //   socket.emit('mousedown', data);
-            // });
-            // socket.on('mousemove', function(data){
-            //   socket.emit('mousemove', data);
-            // });
-            // socket.on('mouseup', function(data){
-            //   socket.emit('mouseup', data);
-            // });
+            socket.on('mousedown', function(data){
+              data.id = socket.info.id;
+              data.user = socket.info.user;
+              room.broadcast('mousedown', data);
+            });
+            socket.on('mousemove', function(data){
+              data.id = socket.info.id;
+              data.user = socket.info.user;
+              room.broadcast('mousemove', data);
+            });
+            socket.on('mouseup', function(data){
+              data.id = socket.info.id;
+              data.user = socket.info.user;
+              room.broadcast('mouseup', data);
+            });
+            socket.on('mouseout', function(data){
+              data.id = socket.info.id;
+              data.user = socket.info.user;
+              room.broadcast('mouseout', data);
+            });
 
           });
           ret.isRoom = true;

@@ -104,12 +104,12 @@
 	};
 
 
-	var CanvasMirroring = function(element, socket, options) {
+	var CanvasMirroring = function(element, id, options) {
 		var me = this;
 				me.element = element;
 				me.options = options;
 
-		var canvas = $('<canvas class="canvas-mirror" width='+ me.options.width +' height=' + me.options.height + '>').appendTo(me.element)[0];
+		var canvas = $('<canvas id="canvas' + id + '" class="canvas-mirror" width='+ me.options.width +' height=' + me.options.height + '>').appendTo(me.element)[0];
 
 		me.canvas = canvas;
 		me.context = me.canvas.getContext("2d");
@@ -123,7 +123,6 @@
 		me.setLineWidth(me.lineWidth = me.options.lineWidth);
 		me.context.lineCap = me.options.lineCap;
 		me.context.lineJoin = me.options.lineJoin;
-
 	};
 
 	CanvasMirroring.prototype = {
@@ -180,11 +179,15 @@
 			},
 			clear : function(){
 				this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+			},
+			destroy : function(){
+				$(this.canvas).remove();
+				delete this;
 			}
 	};
 
-	$.fn.addCanvasMirror = function (socket, options) {
-		return new CanvasMirroring($(this).find('canvas').parent()[0], socket, $.extend({}, $.fn.addCanvasMirror.defaults, options));
+	$.fn.addCanvasMirror = function (id, options) {
+		return new CanvasMirroring($(this).find('canvas').parent()[0], id, $.extend({}, $.fn.addCanvasMirror.defaults, options));
 	};
 
 	$.fn.addCanvasMirror.defaults = {

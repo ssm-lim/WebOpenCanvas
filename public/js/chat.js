@@ -36,18 +36,9 @@
 			constructor: CanvasChat,
 			init : function(){
 				var me = this;
-				this.socket.on('serverMsg', function(data){
-					me.addMsg(data);
-				});
 
-				this.socket.on('changePerson', function(data){
-					var msg = data.user + '님이 ';
-					if(data.status){
-						msg += '입장하셨습니다.';
-					} else {
-						msg += '퇴장하셨습니다.';
-					}
-					me.sysMsg(msg);
+				me.socket.on('serverMsg', function(data){
+					me.chat.addMsg(data);
 				});
 			},
 			sysMsg : function(message) {

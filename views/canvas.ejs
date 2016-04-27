@@ -68,6 +68,7 @@
         var socket = io.connect('http://localhost:3000/<%=roomNo %>');
 
   			if(socket != null && socket != undefined){
+          canvases = {};
 
           socket.on('disconnection', function(data){
             var msg = '접속을 종료합니다.';
@@ -108,50 +109,24 @@
               height : <%=height %>
             });
 
-            $('#chat').show().chat(socket);
+            chat = $('#chat').show().chat(socket);
 
           });
 
           socket.on('changePerson', function(data){
-            // canvas 삭제
+            var msg = data.user + '님이 ';
+            if(data.status){
+              msg += '입장하셨습니다.';
+              canvases[data.info.id] = $('#canvasDiv').addCanvasMirror(data.info.id);
+              //canvas 추가
+            } else {
+              msg += '퇴장하셨습니다.';
+              //cavnas삭제
+              canvases[data.info.id].destroy();
+            }
+            chat.sysMsg(msg);
+
           });
-
-
-        //   $('#canvasDiv').canvas({
-            // mousedown : function(tool, coordinate){
-            //   socket.emit('mousedown', {
-            //     tool : tool,
-            //     coordinate : coordinate
-            //   });
-            // },
-            // mousemove : function(tool, coordinate){
-            //   socket.emit('mousemove', {
-            //     tool : tool,
-            //     coordinate : coordinate
-            //   });
-            // },
-            // mouseup : function(tool, coordinate){
-            //   socket.emit('mouseup', {
-            //     tool : tool,
-            //     coordinate : coordinate
-            //   });
-            // }
-          // });
-
-          // var context = $('#canvas')[0].getContext('2d');
-
-  				// socket.on('mousedown', function(data){
-          //   context.beginPath();
-          //   context.moveTo(data.coordinate.startX, data.coordinate.startY);
-  				// });
-          // socket.on('mousemove', function(data){
-          //   context.lineTo(data.coordinate.mouseX, data.coordinate.mouseY);
-          //   context.stroke();
-  				// });
-          // socket.on('mouseup', function(data){
-          //   context.closePath();
-  				// });
-
 
 
       	};
