@@ -34,7 +34,7 @@
 				zIndex.splice(idx, 1);
 				zIndex.push(item);
 				for (var i = 0; i < zIndex.length; i++) {
-					$(zIndex[i]).css('z-index', i);
+					$(zIndex[i]).css('z-index', i + 100);
 				}
 			};
 

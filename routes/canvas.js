@@ -1,22 +1,5 @@
 var express = require('express');
 
-function generateId(param){
-    var len = param || 5;
-    var id = "";
-    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    for( var i=0; i < len; i++ )
-        id += possible.charAt(Math.floor(Math.random() * possible.length));
-    return id;
-}
-
-function generateRoom(io){
-  var room = generateId(7);
-  while(io.nsps['/' + room]){
-    room = generateId(7);
-  }
-  return room;
-}
-
 function isExistUser(room, user){
   var sockets = Object.keys(room.sockets);
   for(var i = 0; i < sockets.length; i++){
@@ -44,8 +27,17 @@ function sendMsg(room, socket, msg){
 function changePerson(room, socket, status){
   if(status){
     room.info.person++;
+    room.info.users.push({
+      id : socket.info.id,
+      user : socket.info.user
+    });
   } else {
     room.info.person--;
+    for(var i=0; i<room.info.users.length; i++){
+      if(room.info.users[i] && room.info.users[i].id == socket.info.id){
+        room.info.users.splice(i, 1);
+      }
+    }
   }
   room.emit('changePerson', {
     id : socket.info.id,
@@ -54,36 +46,6 @@ function changePerson(room, socket, status){
     status : status
   });
 }
-
-// on : connection : 접속
-// - join : 대화명 등록
-// join-ok -> chat셋, canvas셋, layer셋
-// join-reject -> alert
-//
-//
-// chat set - sockets 인포 가져오기
-//
-// sysMsg
-// sendMsg
-// receiveMsg
-//
-// canvas
-//
-// mousemove
-// mouseout
-// mousedown
-// mouseup
-// undo
-// redo
-//
-//
-// layer
-// addUser
-// removeUser
-// isMovableLayer
-// moveLayer
-// (나중) addLayer
-// (나중) removeLayer
 
 module.exports = function(io){
   var router = express.Router();
@@ -95,10 +57,10 @@ module.exports = function(io){
           ret.width = req.body.width;
           ret.height = req.body.height;
           ret.person = req.body.person;
+          ret.roomNo = req.body.roomNo;
 
       if(type && parseInt(type) > 0){
         ret.isRoom = true;
-        ret.roomNo = generateRoom(io);
 
         var room = io.of(ret.roomNo);
             room.info = {};
@@ -119,22 +81,64 @@ module.exports = function(io){
               socket.info.id = socket.id.split('#')[1];
 
               if(room.info.max > room.info.person){
-                console.log('[socket] Socket connected..................');
 
                 socket.join(room.info.roomNo);
+                console.log('[socket] Socket connected..................');
+
                 socket.on('join', function(data){
                   if(isExistUser(room, data.user)){
                     rejectJoin(socket, 'duplicated');
                   } else {
-                    console.log('[socket] Enter ' + socket.info.user + '('+ socket.info.id +') in ' + room.info.roomNo + ".");
                     socket.info.user = data.user;
-                    socket.emit('join-ok', socket.info);
+                    console.log('[socket] Enter ' + socket.info.user + '(' + socket.info.id + ') in ' + room.info.roomNo + ".");
+                    socket.emit('join-ok', {
+                      socket : socket.info,
+                      room : room.info
+                    });
                     changePerson(room, socket, true);
-                  }
-                });
 
-                socket.on('clientMsg', function(data){
-                  sendMsg(room, socket, data.msg);
+                    socket.on('clientMsg', function(data){
+                      sendMsg(room, socket, data.msg);
+                    });
+
+                    socket.on('disconnect', function(){
+                      socket.leave(socket.info.roomNo);
+                      changePerson(room, socket, false);
+                      console.log('[socket] Exit ' + socket.info.user + '(' + socket.info.id + ') in ' + room.info.roomNo + ".");
+                    });
+
+                    socket.on('mousedown', function(data){
+                      data.id = socket.info.id;
+                      data.user = socket.info.user;
+                      socket.broadcast.emit('mousedown', data);
+                    });
+                    socket.on('mousemove', function(data){
+                      data.id = socket.info.id;
+                      data.user = socket.info.user;
+                      socket.broadcast.emit('mousemove', data);
+                    });
+                    socket.on('mouseup', function(data){
+                      data.id = socket.info.id;
+                      data.user = socket.info.user;
+                      socket.broadcast.emit('mouseup', data);
+                    });
+                    socket.on('mouseout', function(data){
+                      data.id = socket.info.id;
+                      data.user = socket.info.user;
+                      socket.broadcast.emit('mouseout', data);
+                    });
+                    socket.on('undo', function(data){
+                      data.id = socket.info.id;
+                      data.user = socket.info.user;
+                      socket.broadcast.emit('undo', data);
+                    });
+                    socket.on('redo', function(data){
+                      data.id = socket.info.id;
+                      data.user = socket.info.user;
+                      socket.broadcast.emit('redo', data);
+                    });
+
+                  }
                 });
 
               } else {
@@ -142,41 +146,6 @@ module.exports = function(io){
                   code : 'max'
                 });
               }
-
-
-
-              room.on('disconnection', function(socket){
-                var info = socket.info;
-                socket.leave(info.roomNo);
-                changePerson(room, socket, false);
-                console.log('[socket] Exit ' + socket.info.user + '('+ socket.info.id +') in ' + room.info.roomNo + ".");
-
-                if(room.info.person){
-                  // http://stackoverflow.com/questions/33304856/how-to-remove-io-onconnection-listener
-                  room.removeListener('connection', connectionHandler);
-                }
-              });
-
-            socket.on('mousedown', function(data){
-              data.id = socket.info.id;
-              data.user = socket.info.user;
-              room.broadcast('mousedown', data);
-            });
-            socket.on('mousemove', function(data){
-              data.id = socket.info.id;
-              data.user = socket.info.user;
-              room.broadcast('mousemove', data);
-            });
-            socket.on('mouseup', function(data){
-              data.id = socket.info.id;
-              data.user = socket.info.user;
-              room.broadcast('mouseup', data);
-            });
-            socket.on('mouseout', function(data){
-              data.id = socket.info.id;
-              data.user = socket.info.user;
-              room.broadcast('mouseout', data);
-            });
 
           });
           ret.isRoom = true;

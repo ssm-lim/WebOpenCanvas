@@ -2,141 +2,164 @@
 (function($){
 
 	var drawingTools = {
-		pencil : function(drawing) {
-			var context = drawing.context,
-					canvas = drawing.container;
-			drawing.setColor();
-			drawing.setLineWidth();
-			drawing.started = false;
+		pencil : function(self) {
+			var context = self.context,
+					canvas = self.container;
+			self.setColor();
+			self.setLineWidth();
+			self.started = false;
 
 			this.mousedown = function(e) {
-				drawing.startX = e.offsetX;
-				drawing.startY = e.offsetY;
+				self.startX = e.offsetX;
+				self.startY = e.offsetY;
 				context.beginPath();
-				context.moveTo(drawing.startX, drawing.startY);
-				drawing.started = true;
+				context.moveTo(self.startX, self.startY);
+				self.started = true;
+
+				if(self.options.mousedown){
+					self.options.mousedown(self.getCanvasInfo());
+				}
 			};
 
 			this.mousemove = function(e) {
-
-				if (drawing.started) {
-					drawing.mouseX = e.offsetX;
-					drawing.mouseY = e.offsetY;
-					context.lineTo(drawing.mouseX, drawing.mouseY);
+				if (self.started) {
+					self.mouseX = e.offsetX;
+					self.mouseY = e.offsetY;
+					context.lineTo(self.mouseX, self.mouseY);
 					context.stroke();
+
+					if(self.options.mousemove){
+						self.options.mousemove(self.getCanvasInfo());
+					}
 				}
 			};
 
 			this.mouseup = function(e) {
-				if (drawing.started) {
+				if (self.started) {
 					context.closePath();
-					drawing.started = false;
-					drawing.push();
+					self.started = false;
+					self.push();
+
+					if(self.options.mouseup){
+						self.options.mouseup(self.getCanvasInfo());
+					}
 				}
 			};
 
 			this.mouseout = this.mouseup;
 		},
-		eraser : function(drawing) {
-			var context = drawing.context,
-				canvas = drawing.container;
+		eraser : function(self) {
+			var context = self.context,
+				canvas = self.container;
 
-			drawing.started = false;
-			drawing.setLineWidth();
+			self.started = false;
+			self.setLineWidth();
 			context.strokeStyle = "#fff";
 
 			this.mousedown = function(e) {
-				drawing.startX = e.offsetX;
-				drawing.startY = e.offsetY;
+				self.startX = e.offsetX;
+				self.startY = e.offsetY;
 				context.beginPath();
-				context.moveTo(drawing.startX, drawing.startY);
-				drawing.started = true;
+				context.moveTo(self.startX, self.startY);
+				self.started = true;
 			};
 
 			this.mousemove = function(e) {
 
-				if (drawing.started) {
-					drawing.mouseX = e.offsetX;
-					drawing.mouseY = e.offsetY;
-					context.lineTo(drawing.mouseX, drawing.mouseY);
+				if (self.started) {
+					self.mouseX = e.offsetX;
+					self.mouseY = e.offsetY;
+					context.lineTo(self.mouseX, self.mouseY);
 					context.stroke();
 				}
 			};
 
 			this.mouseup = function(e) {
-				if (drawing.started) {
+				if (self.started) {
 					context.closePath();
-					drawing.started = false;
-					drawing.push();
+					self.started = false;
+					self.push();
 				}
 			};
 
 			this.mouseout = this.mouseup;
 		},
-		rectangle : function(drawing) {
-			var context = drawing.context,
-				canvas = drawing.container;
+		rectangle : function(self) {
+			var context = self.context,
+				canvas = self.container;
 
-			drawing.setColor();
-			drawing.setLineWidth();
+			self.setColor();
+			self.setLineWidth();
 
-			drawing.started = false;
+			self.started = false;
 
 			this.mousedown = function(e) {
-				drawing.startX = e.offsetX;
-				drawing.startY = e.offsetY;
+				self.startX = e.offsetX;
+				self.startY = e.offsetY;
 				context.beginPath();
-				drawing.started = true;
+				self.started = true;
+
+				if(self.options.mousedown){
+					self.options.mousedown(self.getCanvasInfo());
+				}
 			};
 
 			this.mousemove = function(e) {
 
-				if (drawing.started) {
-					drawing.mouseX = e.offsetX;
-					drawing.mouseY = e.offsetY;
+				if (self.started) {
+					self.mouseX = e.offsetX;
+					self.mouseY = e.offsetY;
 
-					var x = Math.min(drawing.mouseX, drawing.startX), y = Math.min(drawing.mouseY, drawing.startY),
-						w = Math.abs(drawing.mouseX - drawing.startX), h = Math.abs(drawing.mouseY - drawing.startY);
-					drawing.redraw();
+					var x = Math.min(self.mouseX, self.startX), y = Math.min(self.mouseY, self.startY),
+						w = Math.abs(self.mouseX - self.startX), h = Math.abs(self.mouseY - self.startY);
+					self.redraw();
 					context.strokeRect(x, y, w, h);
+
+					if(self.options.mousemove){
+						self.options.mousemove(self.getCanvasInfo());
+					}
 				}
 			};
 
 			this.mouseup = function(e) {
-				if (drawing.started) {
+				if (self.started) {
 					context.closePath();
-					drawing.started = false;
-					drawing.push();
+					self.started = false;
+					self.push();
+
+					if(self.options.mouseup){
+						self.options.mouseup(self.getCanvasInfo());
+					}
 				}
 			};
 
 			this.mouseout = this.mouseup;
 		},
-		circle : function(drawing) {
-			var context = drawing.context,
-				canvas = drawing.container;
+		circle : function(self) {
+			var context = self.context,
+				canvas = self.container;
 
-			drawing.setColor();
-			drawing.setLineWidth();
+			self.setColor();
+			self.setLineWidth();
 
-			drawing.started = false;
+			self.started = false;
 
 			this.mousedown = function(e) {
-				drawing.startX = e.offsetX;
-				drawing.startY = e.offsetY;
-				drawing.started = true;
+				self.startX = e.offsetX;
+				self.startY = e.offsetY;
+				self.started = true;
 			};
 
 			this.mousemove = function(e) {
 
-				if (drawing.started) {
-					drawing.mouseX = e.offsetX;
-					drawing.mouseY = e.offsetY;
+				if (self.started) {
+					self.mouseX = e.offsetX;
+					self.mouseY = e.offsetY;
 
-					drawing.redraw();
+					self.redraw();
 
-					var x = Math.min(drawing.mouseX, drawing.startX), y = Math.min(drawing.mouseY, drawing.startY),
-						w = Math.abs(drawing.mouseX - drawing.startX), h = Math.abs(drawing.mouseY - drawing.startY);
+					var x = Math.min(self.mouseX, self.startX), y = Math.min(self.mouseY, self.startY),
+						w = Math.abs(self.mouseX - self.startX), h = Math.abs(self.mouseY - self.startY);
 					var cX = x + w / 2.0, cY = y + h / 2.0,
 						r = Math.sqrt(Math.pow(w / 2.0, 2) + Math.pow(h / 2.0, 2), 2);
 					context.beginPath();
@@ -147,49 +170,49 @@
 			};
 
 			this.mouseup = function(e) {
-				if (drawing.started) {
-					drawing.started = false;
-					drawing.push();
+				if (self.started) {
+					self.started = false;
+					self.push();
 				}
 			};
 
 			this.mouseout = this.mouseup;
 		},
-		line : function(drawing) {
-			var canvas = drawing.canvas,
-				context = drawing.context;
+		line : function(self) {
+			var canvas = self.canvas,
+				context = self.context;
 
-			drawing.setColor();
-			drawing.setLineWidth();
+			self.setColor();
+			self.setLineWidth();
 
-			drawing.started = false;
+			self.started = false;
 
 			this.mousedown = function(e) {
-				drawing.startX = e.offsetX;
-				drawing.startY = e.offsetY;
-				drawing.started = true;
+				self.startX = e.offsetX;
+				self.startY = e.offsetY;
+				self.started = true;
 			};
 
 			this.mousemove = function(e) {
 
-				if (drawing.started) {
-					drawing.mouseX = e.offsetX;
-					drawing.mouseY = e.offsetY;
+				if (self.started) {
+					self.mouseX = e.offsetX;
+					self.mouseY = e.offsetY;
 
-					drawing.redraw();
+					self.redraw();
 
 					context.beginPath();
-					context.moveTo(drawing.startX, drawing.startY);
-					context.lineTo(drawing.mouseX, drawing.mouseY);
+					context.moveTo(self.startX, self.startY);
+					context.lineTo(self.mouseX, self.mouseY);
 					context.stroke();
 					context.closePath();
 				}
 			};
 
 			this.mouseup = function(e) {
-				if (drawing.started) {
-					drawing.started = false;
-					drawing.push();
+				if (self.started) {
+					self.started = false;
+					self.push();
 				}
 			};
 
@@ -211,7 +234,7 @@
 								}
 						 }).appendTo(me.element);
 
-		me.canvas = $('<canvas width='+ me.options.width +' height=' + me.options.height + '>').appendTo(me.container)[0];
+		me.canvas = $('<canvas width='+ me.options.width +' height=' + me.options.height + ' style="z-index:20;">').appendTo(me.container)[0];
 		me.context = me.canvas.getContext("2d");
 
 		me.record = [];
@@ -261,6 +284,9 @@
 					.appendTo(unredo.find('.btn-group'))
 					.click(function() {
 						me.undo();
+						if(me.options.undo){
+							me.options.undo();
+						}
 					}),
 			redoBtn = $('<button type="button" class="btn btn-default">' +
 					'<span class="glyphicon glyphicon-chevron-right"></span>' +
@@ -268,6 +294,9 @@
 					.appendTo(unredo.find('.btn-group'))
 					.click(function() {
 						me.redo();
+						if(me.options.redo){
+							me.options.redo();
+						}
 					});
 
 		var color = $('<div class="color">' +
@@ -309,27 +338,27 @@
 							me.setLineWidth(e.value);
 						});
 
-
-		$(me.container).on('mousedown', function(ev){
-			if(me.options.mousedown){
-				me.options.mousedown(me.options.tool,me.getCanvasInfo());
-			}
-		});
-		$(me.container).on('mouseup', function(ev){
-			if(me.started && me.options.mousedown){
-				me.options.mouseup(me.options.tool,me.getCanvasInfo());
-			}
-		});
-		$(me.container).on('mouseout', function(ev){
-			if(me.started && me.options.mousedown){
-				me.options.mouseout(me.options.tool,me.getCanvasInfo());
-			}
-		});
-		$(me.container).on('mousemove', function(ev){
-			if(me.started && me.options.mousedown){
-				me.options.mousemove(me.options.tool, me.getCanvasInfo());
-			}
-		});
+			//
+			// $(me.container).on('mousedown', function(ev){
+			// 	if(me.options.mousedown){
+			// 		me.options.mousedown(me.getCanvasInfo());
+			// 	}
+			// });
+			// $(me.container).on('mousemove', function(ev){
+			// 	if(me.started && me.options.mousemove){
+			// 		me.options.mousemove(me.getCanvasInfo());
+			// 	}
+			// });
+			// $(me.container).on('mouseup', function(ev){
+			// 	if(me.options.mouseup){
+			// 		me.options.mouseup(me.getCanvasInfo());
+			// 	}
+			// });
+			// $(me.container).on('mouseout', function(ev){
+			// 	if(me.options.mouseout){
+			// 		me.options.mouseout(me.getCanvasInfo());
+			// 	}
+			// });
 
 	};
 
@@ -401,6 +430,7 @@
 					mouseX : this.mouseX,
 					mouseY : this.mouseY,
 					started : this.started,
+					tool : this.options.tool,
 					color : this.color,
 					lineWidth : this.lineWidth,
 					type : this.options.tool

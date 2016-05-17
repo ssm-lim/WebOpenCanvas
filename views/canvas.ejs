@@ -29,12 +29,12 @@
 			<div class="modal-dialog" role="document">
 				<div class="modal-content">
 					<div class="modal-header">
-						<h4 class="modal-title" id="">시작</h4>
+						<h4 class="modal-title" id="">Start</h4>
 					</div>
 					<div class="modal-body">
 						<form class="form-horizontal">
 							<div class="form-group">
-								<label for="" class="col-sm-2 control-label">대화명</label>
+								<label for="" class="col-sm-2 control-label">User name</label>
 								<div class="col-sm-10">
 									<input type="text" class="form-control" id="modalChatName">
                   <span id="modalChatErr" class="help-block"></span>
@@ -43,8 +43,8 @@
 						</form>
 					</div>
 					<div class="modal-footer">
-						<button type="button" class="btn btn-default" data-dismiss="modal" id="modalChatCancel">취소</button>
-						<button type="button" class="btn btn-primary" id="modalChatStart">확인</button>
+						<button type="button" class="btn btn-default" data-dismiss="modal" id="modalChatCancel">Cancel</button>
+						<button type="button" class="btn btn-primary" id="modalChatStart">Confirm</button>
 					</div>
 				</div>
 			</div>
@@ -62,18 +62,24 @@
 
   <script type="text/javascript">
     $(document).ready(function(){
-      var myCanvas;
+
 
       <% if(isRoom == true) {%>
-        var socket = io.connect('http://localhost:3000/<%=roomNo %>');
+        var socket = io.connect(document.location.origin + '/<%=roomNo %>');
 
   			if(socket != null && socket != undefined){
+          var myCanvas,
+              room = {
+                roomNo : '<%=roomNo %>',
+                person : 0,
+                users : []
+              };
           canvases = {};
 
           socket.on('disconnection', function(data){
-            var msg = '접속을 종료합니다.';
+            var msg = 'Terminate the connection';
             if(data.code == 'max'){
-              msg += '\n최대 인원수를 초과하였습니다.';
+              msg += '\nIt has exceeded the maximum number of people.';
             }
             alert(msg);
             location.href = '/';
@@ -92,65 +98,159 @@
           });
 
           socket.on('join-reject', function(data){
-            var errMsg = '알 수 없는 에러가 발생하였습니다. 처음부터 다시 진행해주세요.';
+            var errMsg = 'An unknown error has occurred. Please proceed again from the beginning .';
             if(data.code == 'noroom'){
-              errMsg = '방이 존재하지 않습니다. 처음부터 다시 진행해주세요.';
+              errMsg = 'The room does not exist. Please proceed again from the beginning .';
             } else if(data.code == 'duplicated'){
-              errMsg = '이미 사용중인 대화명입니다.';
+              errMsg = 'The user name is already in use.';
             }
             $('#modalChatErr').val(errMsg);
           });
 
+
           socket.on('join-ok', function(data){
+            socket.info = data.socket;
+            room.users = data.room.users;
+
             $('.part-modal').remove();
 
-            $('#canvasDiv').canvas({
+            myCanvas = $('#canvasDiv').canvas({
               width : <%=width %>,
-              height : <%=height %>
+              height : <%=height %>,
+              mousedown : function(data){
+                socket.emit('mousedown', data);
+              },
+              mousemove : function(data){
+                socket.emit('mousemove', data);
+              },
+              mouseup : function(data){
+                socket.emit('mouseup', data);
+              },
+              mouseout : function(data){
+                socket.emit('mouseout', data);
+              },
+              undo : function(){
+                socket.emit('undo');
+              },
+              redo : function(){
+                socket.emit('redo');
+              }
             });
 
-            chat = $('#chat').show().chat(socket);
+            chat = $('#chat').show().chat(room, socket);
+
+            for(var i=0; i<room.users.length; i++){
+              if(room.users[i] && room.users[i].id != socket.info.id){
+                canvases[room.users[i].id] = $('#canvasDiv').addCanvasMirror(room.users[i].id);
+              }
+            }
+
+            socket.on('changePerson', function(data){
+
+              var msg = ' "' + data.user + '" ';
+              if(data.status){
+                room.person++;
+                room.users.push({
+                  id : data.id,
+                  user : data.user
+                });
+
+                msg += 'has entered.';
+
+                if(socket.info.id != data.id && !canvases[data.id]){
+                  canvases[data.id] = $('#canvasDiv').addCanvasMirror(data.id);
+                }
+
+              } else {
+                room.person--;
+                for(var i=0; i<room.users.length; i++){
+                  if(room.users[i] && room.users[i].id == data.id){
+                    room.users.splice(i, 1);
+                  }
+                }
+
+                msg += 'has left.';
+
+                if(socket.info.id != data.id && canvases[data.id]){
+                  canvases[data.id].destroy();
+                }
+              }
+              chat.sysMsg(msg);
+              chat.setUserCount(room.users.length);
+
+            });
+          });
+
+          socket.on('mousedown', function(data){
+            var target = canvases[data.id];
+            if(target){
+              if(!target.tool || data.tool != target.options.tool){
+                target.setTool(data.tool);
+              }
+
+              if(target.color != data.color){
+                target.color = data.color;
+              }
+              if(target.lineWidth != data.lineWidth){
+                target.lineWidth = data.lineWidth;
+              }
+
+              if(target.tool.mousedown){
+                target.tool.mousedown(data);
+              } else {
+                return false;
+              }
+            }
 
           });
 
-          socket.on('changePerson', function(data){
-            var msg = data.user + '님이 ';
-            if(data.status){
-              msg += '입장하셨습니다.';
-              canvases[data.info.id] = $('#canvasDiv').addCanvasMirror(data.info.id);
-              //canvas 추가
+          socket.on('mousemove', function(data){
+            var target = canvases[data.id];
+            if(target && target.tool.mousemove){
+              target.tool.mousemove(data);
             } else {
-              msg += '퇴장하셨습니다.';
-              //cavnas삭제
-              canvases[data.info.id].destroy();
+              return false;
             }
-            chat.sysMsg(msg);
+          });
 
+          socket.on('mouseup', function(data){
+            var target = canvases[data.id];
+            if(target && target.tool.mouseup){
+              target.tool.mouseup(data);
+            } else {
+              return false;
+            }
+          });
+
+          socket.on('mouseout', function(data){
+            var target = canvases[data.id];
+            if(target && target.tool.mouseout){
+              target.tool.mouseout(data);
+            } else {
+              return false;
+            }
+          });
+
+          socket.on('undo', function(data){
+            var target = canvases[data.id];
+            if(target){
+              target.undo();
+            } else {
+              return false;
+            }
+          });
+
+          socket.on('redo', function(data){
+            var target = canvases[data.id];
+            if(target){
+              target.redo();
+            } else {
+              return false;
+            }
           });
 
 
       	};
-      //
-      //   $('#start').click(function(){
-      //
-      //   });
-      //
-      //   $('#cancel').click(function(){
-      //
-      //   });
-
-      // var layers = $('#layers');
-      // var heading = layers.find('.panel-heading');
-      //     layers.draggable(heading);
-      //     layers.minimalize(heading);
-      //
-      // var layerList = layer.find('.layer-list');
-      // layerList.on('click', 'a', function(e){
-      //   layerList.find('a').removeClass('active');
-      //
-      //   $(this).addClass('active');
-      // });
-
 
 
       <% } else {%>
@@ -167,3 +267,27 @@
 
 </body>
 </html>
+
+<!--
+http://solutionoptimist.com/2013/12/28/awesome-github-tricks/
+
+
+
+Problem
+- When broswer refreshing, the socket connection is duplicated.
+- Though a room is empty, the room isn't removed.
+
+
+Needed feature
+- chat
+-- Add people list.
+- draggable
+-- Upgrade event performance .
+- canvas
+-- Add layers.
+-- Add paint.
+-- Add downloading image in canvas.
+-- Add feature whether keeping canvas after got out.
+-- When one enter the room, canvas status of others have to be reflected in one's mirroring-canvas.
+
+-->

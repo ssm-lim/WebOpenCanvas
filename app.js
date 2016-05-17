@@ -23,7 +23,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', require('./routes/index'));
+app.use('/', require('./routes/index')(app.io));
 app.use('/canvas', require('./routes/canvas')(app.io));
 
 // catch 404 and forward to error handler

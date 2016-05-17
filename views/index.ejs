@@ -41,14 +41,15 @@ $(document).ready(function() {
 	<div class="container">
 		<div class="panel panel-default" id="configure" value="0">
 			<ul class="nav nav-tabs configure-tab">
-				<li role="presentation" class="active" value="0"><a><span class="glyphicon glyphicon-user"></span>혼자하기</a></li>
-				<li role="presentation" value="1"><a><span class="glyphicon glyphicon-globe"></span>같이하기</a></li>
+				<li role="presentation" class="active" value="0"><a><span class="glyphicon glyphicon-user"></span>Single</a></li>
+				<li role="presentation" value="1"><a><span class="glyphicon glyphicon-globe"></span>Party</a></li>
 			</ul>
 			<div class="panel-body">
 				<form id="configureForm" class="form-horizontal">
-          <input type="hidden" value="0" name="type" value="0"/>
+          <input type="hidden" name="type" value="0"/>
+          <input type="hidden" name="roomNo" value="<%=roomNo %>"/>
 					<div class="form-group">
-						<label for="" class="col-sm-4 control-label">캔버스 크기</label>
+						<label for="" class="col-sm-4 control-label">Canvas size</label>
 						<div class="col-sm-8">
 							<input type="text" class="form-control configure-size" name="width">
 							<span>x</span>
@@ -56,7 +57,7 @@ $(document).ready(function() {
 						</div>
 					</div>
 					<div class="form-group room" style="display:none">
-						<label for="" class="col-sm-4 control-label">최대 인원수</label>
+						<label for="" class="col-sm-4 control-label">Maximum drawing</label>
 						<div class="col-sm-8">
 							<select class="form-control configure-person" name="person">
 								<option>2</option>
@@ -68,7 +69,7 @@ $(document).ready(function() {
 				</form>
 			</div>
 			<div class="panel-footer text-right">
-				<button class="btn btn-primary" type="submit" id="configureSubmit">시작</button>
+				<button class="btn btn-primary" type="submit" id="configureSubmit">Start</button>
 			</div>
 		</div>
 	</div>

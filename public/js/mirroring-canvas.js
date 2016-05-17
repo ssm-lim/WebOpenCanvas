@@ -2,72 +2,71 @@
 (function($){
 
 	var drawingMirrorTools = {
-		pencil : function(self, data) {
+		pencil : function(self) {
 			var context = self.context;
-			self.setColor();
-			self.setLineWidth();
 
-			this.mousedown = function() {
+			this.mousedown = function(data) {
+				self.setColor();
+				self.setLineWidth();
+
 				context.beginPath();
 				context.moveTo(data.startX, data.startY);
 			};
-			this.mousemove = function() {
+			this.mousemove = function(data) {
 				context.lineTo(data.mouseX, data.mouseY);
 				context.stroke();
 			};
-			this.mouseup = function() {
+			this.mouseup = function(data) {
 				context.closePath();
 				self.push();
 			};
 			this.mouseout = this.mouseup;
 		},
-		eraser : function(self, data) {
+		eraser : function(self) {
 			var context = self.context;
-			context.strokeStyle = "#fff";
-			self.setLineWidth();
 
-			this.mousedown = function() {
+			this.mousedown = function(data) {
+				context.strokeStyle = "#fff";
+				self.setLineWidth();
+
 				context.beginPath();
 				context.moveTo(data.startX, data.startY);
 			};
-			this.mousemove = function() {
+			this.mousemove = function(data) {
 				context.lineTo(data.mouseX, data.mouseY);
 				context.stroke();
 			};
-			this.mouseup = function() {
+			this.mouseup = function(data) {
 				context.closePath();
 				self.push();
 			};
 			this.mouseout = this.mouseup;
 		},
-		rectangle : function(self, data) {
+		rectangle : function(self) {
 			var context = self.context;
-			self.setColor();
-			self.setLineWidth();
 
-			this.mousedown = function() {
-				context.beginPath();
+			this.mousedown = function(data) {
+				self.setColor();
+				self.setLineWidth();
 			};
-			this.mousemove = function() {
+			this.mouseup = function(data) {
+				context.beginPath();
 				var x = Math.min(data.mouseX, data.startX), y = Math.min(data.mouseY, data.startY),
 						w = Math.abs(data.mouseX - data.startX), h = Math.abs(data.mouseY - data.startY);
-				self.redraw();
 				context.strokeRect(x, y, w, h);
-			};
-			this.mouseup = function() {
 				context.closePath();
 				self.push();
 			};
 			this.mouseout = this.mouseup;
 		},
-		circle : function(self, data) {
+		circle : function(self) {
 			var context = self.context;
-			self.setColor();
-			self.setLineWidth();
 
-			this.mousedown = function() {};
-			this.mousemove = function() {
-				self.redraw();
+			this.mousedown = function(data) {
+				self.setColor();
+				self.setLineWidth();
+			};
+			this.mouseup = function(data) {
 				var x = Math.min(data.mouseX, data.startX), y = Math.min(data.mouseY, data.startY),
 						w = Math.abs(data.mouseX - data.startX), h = Math.abs(data.mouseY - data.startY);
 				var cX = x + w / 2.0, cY = y + h / 2.0,
@@ -76,27 +75,25 @@
 				context.arc(cX, cY, r, 0, 2 * Math.PI);
 				context.stroke();
 				context.closePath();
-			};
-			this.mouseup = function() {
-					self.push();
+				self.push();
+
+				console.log(data);
 			};
 			this.mouseout = this.mouseup;
 		},
-		line : function(self, data) {
+		line : function(self) {
 			var context = self.context;
-			self.setColor();
-			self.setLineWidth();
 
-			this.mousedown = function() {};
-			this.mousemove = function() {
-					self.redraw();
-					context.beginPath();
-					context.moveTo(data.startX, data.startY);
-					context.lineTo(data.mouseX, data.mouseY);
-					context.stroke();
-					context.closePath();
+			this.mousedown = function(data) {
+				self.setColor();
+				self.setLineWidth();
 			};
-			this.mouseup = function() {
+			this.mouseup = function(data) {
+				context.beginPath();
+				context.moveTo(data.startX, data.startY);
+				context.lineTo(data.mouseX, data.mouseY);
+				context.stroke();
+				context.closePath();
 				self.push();
 			};
 			this.mouseout = this.mouseup;
@@ -123,6 +120,8 @@
 		me.setLineWidth(me.lineWidth = me.options.lineWidth);
 		me.context.lineCap = me.options.lineCap;
 		me.context.lineJoin = me.options.lineJoin;
+
+		me.setTool('pencil');
 	};
 
 	CanvasMirroring.prototype = {
@@ -131,12 +130,6 @@
 				var self = this;
 				this.options.tool = tool;
 				this.tool = new this.tools[tool](self);
-				return {
-					mouseup : this.tool.mouseup,
-					mousedown : this.tool.mousedown,
-					mousemove : this.tool.mousemove,
-					mouseout : this.tool.mouseout,
-				};
 			},
 			setColor : function(color) {
 				this.color = color || this.color;
